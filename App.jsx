@@ -1,7 +1,6 @@
-import { Text, StyleSheet, View, FlatList, TouchableOpacity, Image, TextInput } from 'react-native'
+import { Text, StyleSheet, View, FlatList, TouchableOpacity, Image, TextInput, Alert } from 'react-native'
 import React, { useState } from 'react';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-//import RNFS from 'react-native-fs';
 import Share from 'react-native-share';
 import FloatingActionButton from './components/FloatingActionButton';
 import ModalComponent from './Modal';
@@ -31,32 +30,35 @@ const App = () => {
     console.log(editmodalVisible);
   }
 
-  const Search = () => {
-    console.log('Search Pressed');
-  }
-
   const ShareList = async() => {
-    console.log('Share Pressed');
+    if (data.length === 0) {
+      Alert.alert('Empty List', 'Please add items to the list before sharing.');
+      return;
+    }
     var RNFS = require('react-native-fs');
-    // const content = data.map(item => `${item.title}: ${item.description}`).join('\n');
-    // const path = RNFS.DocumentDirectoryPath + '/todoList.txt';
+    const content = data.map(item => `${item.title}: ${item.description}`).join('\n');
+    const path = RNFS.DocumentDirectoryPath + '/todoList.txt';
 
-    // try {
-    //   await RNFS.writeFile(path, content, 'utf8');
-    //   console.log('File written successfully');
+    try {
+      await RNFS.writeFile(path, content, 'utf8');
+      console.log('File written successfully');
 
-    //   // Share the file
-    //   const options = {
-    //     type: 'text/plain',
-    //     message: 'Share this to-do list',
-    //     title: 'Share To-Do List',
-    //     url: 'file://' + path,
-    //   };
+      // Share the file
+      const options = {
+        type: 'text/plain',
+        message: 'Share this to-do list',
+        title: 'Share To-Do List',
+        url: 'file://' + path,
+      };
 
-    //   await Share.open(options);
-    // } catch (error) {
-    //   console.error('Error writing file:', error);
-    // }
+      await Share.open(options);
+    } catch (error) {
+      if (Share.isPackageInstalled(error.errorCode)) {
+        console.log('Share action canceled by user');
+      } else {
+        console.error('Error during share:', error);
+      }
+    }
 
   }
 
@@ -112,9 +114,6 @@ const App = () => {
       <View style={[styles.titleView, styles.backcolor]}>
         <Text style={styles.title}> ToDoList</Text>
         <View style={{ justifyContent: 'flex-end', flexDirection: 'row', flex: 1 }}>
-          {/* <TouchableOpacity style={styles.searchAndShare} onPress={() => Search()} >
-            <Image style={styles.tinyLogo} source={require('./assets/search.png')} />
-          </TouchableOpacity> */}
           <TouchableOpacity style={styles.searchAndShare} onPress={() => ShareList()}>
             <Image style={styles.tinyLogo} source={require('./assets/share.png')} />
           </TouchableOpacity>
