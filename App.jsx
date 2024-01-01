@@ -122,6 +122,7 @@ const App = () => {
       <TextInput
         placeholder='Search'
         clearButtonMode='always'
+        inlineImageLeft='search'
         style={styles.searchBar}
         onChangeText={setSearchQuery}
         value={searchQuery} />
